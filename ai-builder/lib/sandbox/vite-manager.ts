@@ -35,7 +35,7 @@ export class ViteManager {
 
     try {
       // Start Vite process
-      const process = spawn('npm', ['run', 'dev', '--', '--port', port.toString()], {
+      const childProcess = spawn('npm', ['run', 'dev', '--', '--port', port.toString()], {
         cwd: project.path,
         stdio: ['ignore', 'pipe', 'pipe'],
         env: {
@@ -46,15 +46,15 @@ export class ViteManager {
       });
 
       const viteProcess: ViteProcess & { process: ChildProcess } = {
-        pid: process.pid!,
+        pid: childProcess.pid!,
         port,
         startedAt: Date.now(),
         url: `http://localhost:${port}`,
-        process,
+        process: childProcess,
       };
 
       // Handle process output
-      process.stdout?.on('data', (data) => {
+      childProcess.stdout?.on('data', (data: Buffer) => {
         const output = data.toString();
         if (LOGGING.verbose) {
           console.log(`[Vite:${projectId}]`, output);
@@ -66,7 +66,7 @@ export class ViteManager {
         }
       });
 
-      process.stderr?.on('data', (data) => {
+      childProcess.stderr?.on('data', (data: Buffer) => {
         const error = data.toString();
         // Only log errors, not warnings
         if (!error.includes('WARN')) {
@@ -74,7 +74,7 @@ export class ViteManager {
         }
       });
 
-      process.on('close', (code) => {
+      childProcess.on('close', (code: number | null) => {
         console.log(`[ViteManager] Server stopped for ${projectId} (code: ${code})`);
         this.processes.delete(projectId);
         this.allocatedPorts.delete(port);
