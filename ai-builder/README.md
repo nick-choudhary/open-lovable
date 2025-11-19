@@ -4,10 +4,12 @@
 
 ## 🚀 Features
 
+- ✅ **Universal AI Support** - Works with ANY OpenAI-compatible API (LM Studio, Ollama, Together, Groq, Perplexity, etc.)
 - ✅ **Maximum Token Optimization** - 80-95% token savings through intelligent caching
 - ✅ **Anthropic Prompt Caching** - Reuse system prompts across requests (90% cost reduction)
 - ✅ **Smart Context Selection** - Only send relevant files (1-3 vs 20+ files)
 - ✅ **Conversation Windowing** - Auto-trim history to prevent context bloat
+- ✅ **Local & Cloud Models** - Run locally (LM Studio, Ollama) or use cloud APIs
 - ✅ **Local Sandbox** - Projects run on your filesystem with Vite
 - ✅ **Live Preview** - Instant preview with hot reload
 - ✅ **Auto Package Management** - Detects and installs npm packages
@@ -78,7 +80,10 @@ SAVINGS: 94% tokens, 90% cost!
 
 ### Prerequisites
 - Node.js 18+ and npm 9+
-- One of: Anthropic API key, OpenAI API key, or Google AI key
+- One of the following:
+  - **Local Model** (FREE): LM Studio, Ollama, or LocalAI running locally
+  - **Cloud API**: OpenAI, Anthropic, Google, Together AI, Groq, or Perplexity API key
+  - **Any OpenAI-compatible endpoint**
 
 ### Setup
 
@@ -94,20 +99,38 @@ cp .env.example .env.local
 ```
 
 Edit `.env.local`:
+
+**Option 1: Local Model (FREE - Recommended for testing)**
 ```env
-# Choose your AI provider (anthropic recommended for caching)
-AI_PROVIDER=anthropic  # or openai, google
+AI_PROVIDER=openai-compatible
+AI_MODEL=llama-3-70b  # or whatever model you have
+OPENAI_BASE_URL=http://localhost:1234/v1  # LM Studio default
+OPENAI_API_KEY=local  # Can be any string for local models
+```
 
-# API Keys (add at least one)
-ANTHROPIC_API_KEY=sk-ant-xxx
+**Option 2: Cloud Provider**
+```env
+# OpenAI
+AI_PROVIDER=openai-compatible
+AI_MODEL=gpt-4
 OPENAI_API_KEY=sk-xxx
-GEMINI_API_KEY=xxx
 
-# AI Model
+# Or Anthropic (best for caching)
+AI_PROVIDER=anthropic
 AI_MODEL=claude-3-5-sonnet-20241022
+ANTHROPIC_API_KEY=sk-ant-xxx
 
-# Sandbox (optional - defaults to ./projects)
-PROJECTS_DIR=./projects
+# Or Together AI
+AI_PROVIDER=openai-compatible
+AI_MODEL=meta-llama/Llama-3-70b-chat-hf
+OPENAI_BASE_URL=https://api.together.xyz/v1
+OPENAI_API_KEY=your-together-key
+
+# Or Groq
+AI_PROVIDER=openai-compatible
+AI_MODEL=llama-3.1-70b-versatile
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
+OPENAI_API_KEY=your-groq-key
 ```
 
 3. **Initialize**

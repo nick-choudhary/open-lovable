@@ -10,20 +10,36 @@ export const builderConfig: BuilderConfig = {
   // AI Configuration
   // ============================================================================
   ai: {
-    // Provider selection (anthropic recommended for prompt caching)
-    provider: (process.env.AI_PROVIDER as any) || 'anthropic',
+    // Provider selection
+    // Options: 'openai-compatible', 'anthropic', 'openai', 'google'
+    // Use 'openai-compatible' for any OpenAI-spec API (LM Studio, Ollama, Together, Groq, etc.)
+    provider: (process.env.AI_PROVIDER as any) || 'openai-compatible',
 
-    // Default model (Claude Sonnet for best cost/performance with caching)
-    model: process.env.AI_MODEL || 'claude-3-5-sonnet-20241022',
+    // Default model
+    // For openai-compatible: use model name from your provider
+    // Examples: 'gpt-4', 'llama-3-70b', 'mixtral-8x7b', etc.
+    model: process.env.AI_MODEL || 'gpt-4',
+
+    // Custom base URL for OpenAI-compatible APIs
+    // Examples:
+    //   - LM Studio: http://localhost:1234/v1
+    //   - Ollama: http://localhost:11434/v1
+    //   - Together AI: https://api.together.xyz/v1
+    //   - Groq: https://api.groq.com/openai/v1
+    baseURL: process.env.OPENAI_BASE_URL || undefined,
+
+    // API key for the provider
+    // For local models (LM Studio, Ollama), use any string like 'local'
+    apiKey: process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY,
 
     // Temperature (0.7 for balanced creativity/consistency)
-    temperature: 0.7,
+    temperature: parseFloat(process.env.AI_TEMPERATURE || '0.7'),
 
     // Max tokens per request (8192 ensures complete files)
-    maxTokens: 8192,
+    maxTokens: parseInt(process.env.AI_MAX_TOKENS || '8192'),
 
-    // Enable Anthropic prompt caching (90% cost savings)
-    enableCaching: true,
+    // Enable Anthropic prompt caching (only works with Anthropic)
+    enableCaching: process.env.AI_PROVIDER === 'anthropic',
   },
 
   // ============================================================================

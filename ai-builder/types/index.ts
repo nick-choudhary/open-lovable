@@ -177,8 +177,10 @@ export interface ChatStreamEvent {
 
 export interface BuilderConfig {
   ai: {
-    provider: 'anthropic' | 'openai' | 'google';
+    provider: 'openai-compatible' | 'anthropic' | 'openai' | 'google';
     model: string;
+    baseURL?: string;  // Custom base URL for OpenAI-compatible APIs
+    apiKey?: string;   // API key (can be 'local' for local models)
     temperature: number;
     maxTokens: number;
     enableCaching: boolean;

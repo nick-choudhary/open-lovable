@@ -21,18 +21,47 @@ import type { ChatStreamEvent } from '../../../types';
 // Force dynamic for streaming
 export const dynamic = 'force-dynamic';
 
-// Initialize AI providers
-const anthropic = createAnthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Initialize AI provider based on configuration
+// Supports ANY OpenAI-compatible API (LM Studio, Ollama, Together, Groq, etc.)
+function getAIProvider() {
+  const provider = builderConfig.ai.provider;
+  const apiKey = builderConfig.ai.apiKey;
+  const baseURL = builderConfig.ai.baseURL;
 
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+  console.log(`[Chat] Using AI provider: ${provider}${baseURL ? ` at ${baseURL}` : ''}`);
 
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+  switch (provider) {
+    case 'anthropic':
+      return createAnthropic({
+        apiKey: apiKey || process.env.ANTHROPIC_API_KEY,
+      });
+
+    case 'google':
+      return createGoogleGenerativeAI({
+        apiKey: apiKey || process.env.GEMINI_API_KEY,
+      });
+
+    case 'openai':
+      return createOpenAI({
+        apiKey: apiKey || process.env.OPENAI_API_KEY,
+        baseURL: baseURL,
+      });
+
+    case 'openai-compatible':
+    default:
+      // Works with ANY OpenAI-compatible API:
+      // - LM Studio: http://localhost:1234/v1
+      // - Ollama: http://localhost:11434/v1
+      // - Together AI: https://api.together.xyz/v1
+      // - Groq: https://api.groq.com/openai/v1
+      // - Perplexity: https://api.perplexity.ai
+      // - Any other OpenAI-spec endpoint
+      return createOpenAI({
+        apiKey: apiKey || process.env.OPENAI_API_KEY || 'local', // 'local' works for local models
+        baseURL: baseURL || process.env.OPENAI_BASE_URL,
+      });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -119,20 +148,13 @@ export async function POST(request: NextRequest) {
         // Step 7: Stream from AI with caching
         await sendProgress({ type: 'status', message: '🤖 Generating code...' });
 
-        // Select AI provider
-        const provider = builderConfig.ai.provider;
+        // Get AI provider (supports any OpenAI-compatible API)
+        const aiProvider = getAIProvider();
         const model = builderConfig.ai.model;
+        const provider = builderConfig.ai.provider;
 
-        let modelInstance;
-        if (provider === 'anthropic') {
-          modelInstance = anthropic(model);
-        } else if (provider === 'openai') {
-          modelInstance = openai(model);
-        } else if (provider === 'google') {
-          modelInstance = google(model);
-        } else {
-          throw new Error(`Unsupported AI provider: ${provider}`);
-        }
+        // Create model instance
+        const modelInstance = aiProvider(model);
 
         const streamOptions: any = {
           model: modelInstance,
