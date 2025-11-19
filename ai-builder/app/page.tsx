@@ -1,9 +1,9 @@
 /**
- * Main Application Page
+ * Landing Page
  */
 
-import BuilderInterface from '../components/builder/BuilderInterface';
+import LandingPage from '../components/landing/LandingPage';
 
 export default function Home() {
-  return <BuilderInterface />;
+  return <LandingPage />;
 }
